@@ -15,8 +15,9 @@ const httpServer = createServer(app);
 
 // 配置
 const PORT = parseInt(process.env.PORT || '3001', 10);
-const AUTH_KEY = process.env.AUTH_KEY || '';
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['*'];
+// 去除可能的引号和空格
+const AUTH_KEY = (process.env.AUTH_KEY || '').trim().replace(/^["']|["']$/g, '');
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || ['*'];
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // 验证必需的环境变量
@@ -127,7 +128,10 @@ httpServer.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log(`Environment: ${NODE_ENV}`);
   console.log(`Port: ${PORT}`);
-  console.log(`Auth Key: ${AUTH_KEY.substring(0, 8)}...`);
+  console.log(`Auth Key (first 8 chars): ${AUTH_KEY.substring(0, 8)}...`);
+  console.log(`Auth Key (last 8 chars): ...${AUTH_KEY.substring(AUTH_KEY.length - 8)}`);
+  console.log(`Auth Key Length: ${AUTH_KEY.length}`);
+  console.log(`Full Auth Key (for debugging): ${AUTH_KEY}`);
   console.log(`Allowed Origins: ${ALLOWED_ORIGINS.join(', ')}`);
   console.log('='.repeat(60));
   console.log(`Health Check: http://localhost:${PORT}/health`);
