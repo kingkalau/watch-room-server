@@ -16,8 +16,13 @@ export class WatchRoomServer {
   private members: Map<string, Map<string, Member>> = new Map();
   private socketToRoom: Map<string, RoomMemberInfo> = new Map();
   private cleanupInterval: NodeJS.Timeout | null = null;
+  private authKey: string;
 
-  constructor(private io: SocketIOServer<ClientToServerEvents, ServerToClientEvents>) {
+  constructor(
+    private io: SocketIOServer<ClientToServerEvents, ServerToClientEvents>,
+    authKey?: string
+  ) {
+    this.authKey = authKey || process.env.AUTH_KEY || '';
     this.setupEventHandlers();
     this.startCleanupTimer();
   }
@@ -25,6 +30,20 @@ export class WatchRoomServer {
   private setupEventHandlers() {
     this.io.on('connection', (socket: TypedSocket) => {
       console.log(`[WatchRoom] Client connected: ${socket.id}`);
+
+      // 验证认证
+      const auth = socket.handshake.auth as { token?: string };
+      console.log('[WatchRoom] Auth token from handshake:', auth.token);
+      console.log('[WatchRoom] Expected AUTH_KEY:', this.authKey);
+
+      if (!auth.token || auth.token !== this.authKey) {
+        console.log('[WatchRoom] ❌ Authentication failed, disconnecting client');
+        socket.emit('error', 'Unauthorized');
+        socket.disconnect(true);
+        return;
+      }
+
+      console.log('[WatchRoom] ✅ Authentication successful');
 
       // 创建房间
       socket.on('room:create', (data, callback) => {
