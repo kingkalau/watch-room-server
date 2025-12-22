@@ -5,6 +5,8 @@
 ### 修复
 - 🐛 修复 Docker 构建失败问题：从 `.gitignore` 中移除 `package-lock.json`
 - 🐛 修复部署时缺少 lock 文件导致的 `npm ci` 失败
+- 🐛 修复 TypeScript 编译错误：添加 WebRTC 类型定义
+- 🐛 修复未使用的导入和返回值问题
 - 📝 更新 Dockerfile 使用 `npm ci` 提高构建速度和可靠性
 - 📝 修复部署脚本中的依赖安装命令
 
